@@ -1,4 +1,7 @@
+<%- include('partials/header') %>
+
 <h1>Campgrounds Page</h1>
+<a href="/">Back to landing page</a>
 
 <% campgrounds.forEach(element => { %>
     <div>
@@ -8,3 +11,5 @@
         height: 350px">
     </div>
 <% }) %>
+
+<%- include('partials/footer') %>
