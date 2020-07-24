@@ -1,0 +1,10 @@
+<h1>Campgrounds Page</h1>
+
+<% campgrounds.forEach(element => { %>
+    <div>
+        <h2><%= element.name %></h2>
+        <img src='<%= element.image %>' style="
+        width: 500px;
+        height: 350px">
+    </div>
+<% }) %>
