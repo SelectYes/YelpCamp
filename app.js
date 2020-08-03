@@ -21,8 +21,11 @@ const app = express();
 const mongoose = require('mongoose');
 const { urlencoded } = require('body-parser');
 const { response } = require('express');
-
+const Campground = require('./models/campground');
+const seedDB = require('./seeds')
 const port = 3000;
+
+seedDB();
 
 mongoose.connect('mongodb://localhost:27017/yelp_camp', {
     useNewUrlParser: true,
@@ -35,15 +38,6 @@ app.set('view engine', 'ejs');
 app.use(express.static('public'));
 app.use(express.urlencoded({extended: true}));
 
-// CAMPGROUND SCHEMA SETUP:
-
-const campgroundSchema = new mongoose.Schema({
-    name: String,
-    image: String,
-    description: String
-});
-
-const Campground = mongoose.model('Campground', campgroundSchema);
 
 // Campground.create({
 //     name: "Witch Water Canyon", 
