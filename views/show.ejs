@@ -6,4 +6,12 @@
 
 <h4><%= campground.description %></h4>
 
+<h2>Comments:</h2>
+
+<% campground.comments.forEach(comment => { %>
+
+    <h3><strong><%= comment.author %>: </strong></h3><h3><%= comment.text %></h3>
+
+<% }); %>
+
 <%- include('partials/footer') %>
