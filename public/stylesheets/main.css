@@ -1,0 +1,17 @@
+.thumbnail img {
+    width: 100%;
+    /* object-fit: cover; */
+}
+
+
+.thumbnail {
+    padding: 0;
+    overflow: hidden;
+}
+
+.thumbnail .caption-full {
+    padding: 9px;
+}
+body {
+    /* background-color: purple; */
+}
