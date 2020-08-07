@@ -2,15 +2,19 @@
 //                                              CONFIG                                                  //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-const express = require('express');
-const app = express();
-const mongoose = require('mongoose');
-const { urlencoded } = require('body-parser');
-const { response } = require('express');
-const Campground = require('./models/campground');
+const express               = require('express');
+const app                   = express();
+const mongoose              = require('mongoose');
+const { urlencoded }        = require('body-parser');
+const { response }          = require('express');
+const Campground            = require('./models/campground');
+const seedDB                = require('./seeds')
+const Comment               = require('./models/comment');
+const passport              = require('passport');
+const localStrategy         = require('passport-local');
+const passportLocalMongoose = require('passport-local-mongoose'); 
+const User                  = require('./models/user');
 const port = 3000;
-const seedDB = require('./seeds')
-const Comment = require('./models/comment');
 
 
 mongoose.connect('mongodb://localhost:27017/yelp_camp', {
@@ -25,7 +29,23 @@ app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({extended: true}));
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
-//                                              ROUTES                                                  //
+//                                           PASSPORT CONFIG                                            //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+app.use(require('express-session')({
+    secret: 'Benny is the cutest pooch. 10/10, will pet even when wet.',
+    resave: false,
+    saveUninitialized: false
+}));
+
+app.use(passport.initialize());
+app.use(passport.session());
+passport.use(new localStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                         CAMPGROUND ROUTES                                            //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // seedDB();
@@ -113,32 +133,12 @@ app.post('/campgrounds/:id/comments', async (req, res) => {
     res.redirect(`/campgrounds/${req.params.id}`)
 });
 
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
+//                                       AUTHENTICATION ROUTES                                          //
+//////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+app.get('/register', (req, res) => {
+    res.render('register');
+});
 
-// ======================================================================
-
-// app.post('/campgrounds/:id/comments', (req, res) => {
-
-//     // FIND CAMOGROUND BY ID
-//     Campground.findById(req.params.id, (err, campground) => {
-//         if (err) {
-//             console.log(err);
-//         } else {
-//             // CREATE NEW COMMENT
-//             Comment.create(req.body.comments, (err, comment) => {
-//                 if (err) {
-//                     console.log(err);
-//                 } else {
-//                     // CONNECT NEW COMMENT TO CAMPGROUND
-//                     campground.comments.push(comment);
-//                     campground.save();
-//                     // REDIRECT TO CAMPGROUND SHOW PAGE
-//                     res.redirect(`/campgrounds/${req.params.id}`)
-//                 }
-//             })
-//         }
-//     });
-// });
-
-// ======================================================================
 app.listen(port, console.log(`YelpCamp server has started on Localhost:${port}`));
