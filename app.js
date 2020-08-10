@@ -28,6 +28,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({extended: true}));
 
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                           PASSPORT CONFIG                                            //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +45,20 @@ passport.use(new localStrategy(User.authenticate()));
 passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
+// PASSING LOGGED IN USER DATA TO ALL TEMPLATES
+app.use((req, res, next) => {
+    res.locals.currentUser = req.user;
+    next();
+});
+
+// MIDDLEWARE TO CHECK IF USER IS LOGGED IN
+const isLoggedIn = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 //                                         CAMPGROUND ROUTES                                            //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -51,8 +66,8 @@ passport.deserializeUser(User.deserializeUser());
 // seedDB();
 
 app.get('/', (req, res) => {
-    res.render('landing');
-})
+    res.redirect('/campgrounds');
+});
 
 //INDEX ROUTE (SHOW ALL CAMPGROUNDS)
 app.get('/campgrounds', (req, res) => {
@@ -61,9 +76,9 @@ app.get('/campgrounds', (req, res) => {
         if (err) {
             console.log(err);
         } else {
-            res.render('campgrounds/index', {campgrounds: campgrounds});
+            res.render('campgrounds/index', {campgrounds: campgrounds})
         }
-    })
+    });
 });
 
 //CREATE ROUTE (ADD NEW CAMPGROUNDS TO DATABASE)
@@ -106,7 +121,7 @@ app.get('/campgrounds/:id', (req, res) => {
 //                                          COMMENTS ROUTES                                             //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-app.get('/campgrounds/:id/comments/new', (req, res) => {
+app.get('/campgrounds/:id/comments/new', isLoggedIn, (req, res) => {
     Campground.findById(req.params.id, (err, campground) => {
         if (err) {
             console.log(err);
@@ -117,7 +132,7 @@ app.get('/campgrounds/:id/comments/new', (req, res) => {
     });
 });
 
-app.post('/campgrounds/:id/comments', async (req, res) => {
+app.post('/campgrounds/:id/comments', isLoggedIn, async (req, res) => {
 
     // FIND CAMOGROUND BY ID
     let campground = await Campground.findById(req.params.id)
@@ -137,8 +152,45 @@ app.post('/campgrounds/:id/comments', async (req, res) => {
 //                                       AUTHENTICATION ROUTES                                          //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+//SHOW REGISTER FORM
 app.get('/register', (req, res) => {
     res.render('register');
+});
+
+//HANDLE SIGN-UP LOGIC
+app.post('/register', (req, res) => {
+
+    const newUser = new User({username: req.body.username});
+    const newUserPassword = req.body.password;
+
+    User.register(newUser, newUserPassword, (err, user) => {
+        if (err) {
+            console.log(err);
+            return res.render('register');
+        }
+        passport.authenticate('local')(req, res, () => {
+            res.redirect('/campgrounds');
+        });
+    });
+});
+
+// LOGIN ROUTE
+app.get('/login', (req, res) => {
+    res.render('login')
+});
+
+// HANDLE LOGIN LOGIC
+app.post('/login', passport.authenticate('local',
+    {
+        successRedirect: "/campgrounds",
+        failureRedirect: "/login"
+    }), (req, res) => {
+});
+
+// HANDLE LOGOUT LOGIC
+app.get('/logout', (req, res) => {
+    req.logout();
+    res.redirect('/campgrounds');
 });
 
 app.listen(port, console.log(`YelpCamp server has started on Localhost:${port}`));
