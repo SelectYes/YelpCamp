@@ -9,6 +9,14 @@ app.use((req, res, next) => {
     next();
 });
 
+// MIDDLEWARE TO CHECK IF USER IS LOGGED IN
+const isLoggedIn = (req, res, next) => {
+    if (req.isAuthenticated()) {
+        return next();
+    }
+    res.redirect('/login');
+}
+
 //INDEX ROUTE (SHOW ALL CAMPGROUNDS)
 router.get('/', (req, res) => {
     // RETRIEVE CAMPGROUND DATA FROM DATABASE:
@@ -22,27 +30,26 @@ router.get('/', (req, res) => {
 });
 
 //CREATE ROUTE (ADD NEW CAMPGROUNDS TO DATABASE)
-router.post('/', (req, res) => {
+router.post('/', isLoggedIn, async (req, res) => {
     const name = req.body.name;
     const image = req.body.image;
     const description = req.body.description;
+    const author = {id: req.user._id, username: req.user.username};
 
-    const newCampground = {name: name, image: image, description: description};
+    const newCampground = {name: name, image: image, description: description, author: author};
 
     //CREATE NEW CAMPGROUND IN DB AND REDIRECT TO CAMPGROUNDS PAGE:
-    Campground.create(newCampground, (err, campground) => {
-        if (err) {
-            console.log(err);
-        } else {
-            console.log('NEW CAMPGROUND ADDED: ');
-            console.log(campground);
-            res.redirect('/campgrounds');
-        }
-    })
+    try {
+        await Campground.create(newCampground);
+        console.log('NEW CAMPGROUND ADDED: ');
+        res.redirect('/campgrounds'); 
+    } catch (error) {
+        console.log(error);
+    }
 });
 
 //NEW ROUTE (SHOW FORM TO CREATE NEW CAMPGROUND)
-router.get('/new', (req, res) => {
+router.get('/new', isLoggedIn, (req, res) => {
     res.render('campgrounds/new');
 });
 
@@ -52,6 +59,7 @@ router.get('/:id', (req, res) => {
         if (err) {
             console.log(err);
         } else {
+            // console.log(retrievedData)
             res.render('campgrounds/show', {campground: retrievedData})
         }
     })    

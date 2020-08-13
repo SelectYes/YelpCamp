@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 const Campground = require('./models/campground');
 const Comment = require('./models/comment');
+const User = require('./models/user');
 
 // SEEDS FOR FUTURE USE:
 
@@ -33,17 +34,19 @@ const seedDB = async () => {
         // REMOVE ALL CAMPGROUNDS
         await Campground.deleteMany({}, () => console.log('CAMPGROUNDS REMOVED'));
         await Comment.deleteMany({}, () => console.log('COMMENTS REMOVED'));
+        await User.deleteMany({}, () => console.log('USERS REMOVED'));
+        
     
         // ADD A FEW CAMPGROUNDS
-        seeds.forEach(async seed => {
-            let campground = await Campground.create(seed);
-            let comment = await Comment.create({
-                text: "This campground is great. I just wish we had wifi.",
-                author: "Homer"
-            });
-            campground.comments.push(comment);
-            campground.save();
-        });
+        // seeds.forEach(async seed => {
+        //     let campground = await Campground.create(seed);
+        //     let comment = await Comment.create({
+        //         text: "This campground is great. I just wish we had wifi.",
+        //         author: "Homer"
+        //     });
+        //     campground.comments.push(comment);
+        //     campground.save();
+        // });
     } catch (error) {
         console.log(error);
     }
