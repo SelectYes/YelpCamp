@@ -15,6 +15,8 @@ const localStrategy         = require('passport-local');
 const passportLocalMongoose = require('passport-local-mongoose'); 
 const User                  = require('./models/user');
 const port = 3000;
+const methodOverride        = require('method-override');
+
 
 // routes
 const campgroundRoutes      = require('./routes/campgrounds');
@@ -24,7 +26,8 @@ const indexRoutes           = require('./routes/index');
 
 mongoose.connect('mongodb://localhost:27017/yelp_camp', {
     useNewUrlParser: true,
-    useUnifiedTopology: true
+    useUnifiedTopology: true,
+    useFindAndModify: false
 })
 .then(() => console.log('Connected to DB!'))
 .catch(error => console.log(error.message));
@@ -32,6 +35,7 @@ mongoose.connect('mongodb://localhost:27017/yelp_camp', {
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({extended: true}));
+app.use(methodOverride('_method'));
 
 // SEED THE DATABASE
 // seedDB();

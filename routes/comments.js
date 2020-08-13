@@ -3,6 +3,7 @@ const app           = express();
 const router        = express.Router({mergeParams: true});
 const Campground    = require('../models/campground');
 const Comment       = require('../models/comment');
+// const methodOverride    = require('method-override');
 
 // PASSING LOGGED IN USER DATA TO ALL TEMPLATES
 app.use((req, res, next) => {

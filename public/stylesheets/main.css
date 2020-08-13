@@ -3,7 +3,6 @@
     /* object-fit: cover; */
 }
 
-
 .thumbnail {
     padding: 0;
     overflow: hidden;
@@ -11,6 +10,10 @@
 
 .thumbnail .caption-full {
     padding: 9px;
+}
+
+.caption-full form {
+    display: inline;
 }
 body {
     /* background-color: purple; */

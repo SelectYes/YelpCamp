@@ -2,6 +2,10 @@ const express       = require('express');
 const app           = express();
 const router        = express.Router();
 const Campground    = require('../models/campground');
+// const methodOverride    = require('method-override');
+
+// METHOD OVERRIDE CONFIG
+// app.use(methodOverride('_method'));
 
 // PASSING LOGGED IN USER DATA TO ALL TEMPLATES
 app.use((req, res, next) => {
@@ -62,7 +66,40 @@ router.get('/:id', (req, res) => {
             // console.log(retrievedData)
             res.render('campgrounds/show', {campground: retrievedData})
         }
-    })    
+    }); 
 });
+
+// EDIT ROUTE (SHOW FORM TO EDIT CAMPGROUND)
+router.get('/:id/edit', async (req, res) => {
+    try {
+        const campground = await Campground.findById(req.params.id);
+        res.render('campgrounds/edit', {campground: campground});
+    } catch (error) {
+        console.log('COULD NOT RENDER CAMPGROUND EDIT PAGE');
+    }
+});
+
+// UPDATE ROUTE (UPDATE CAMPGROUND DATA IN DB)
+router.put('/:id', async (req, res) => {
+    try {
+        await Campground.findByIdAndUpdate(req.params.id, req.body.campground);
+        res.redirect(`/campgrounds/${req.params.id}`)
+        
+    } catch (error) {
+        console.log('COULD NOT UPDATE CAMPGROUND');
+    }
+});
+
+// DESTROY ROUTE
+router.delete('/:id', async (req, res) => {
+    try {
+        await Campground.findByIdAndDelete(req.params.id);
+        res.redirect('/campgrounds');
+        
+    } catch (error) {
+        console.log('COULD NOT DELETE CAMPGROUND ENTRY');
+    }
+});
+
 
 module.exports = router;
