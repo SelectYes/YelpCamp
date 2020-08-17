@@ -12,9 +12,18 @@
     padding: 9px;
 }
 
-.caption-full form {
+.remove-button {
     display: inline;
 }
 body {
     /* background-color: purple; */
+}
+
+.comment-form-header {
+    text-align: center;
+}
+
+.comment-form-container {
+    width: 30%; 
+    margin: 25px auto;
 }
