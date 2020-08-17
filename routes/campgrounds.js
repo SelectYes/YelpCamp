@@ -21,6 +21,27 @@ const isLoggedIn = (req, res, next) => {
     res.redirect('/login');
 }
 
+// MIDDLEWARE TO CHECK IF CAMPGROUND BELONGS TO USER
+const checkCampgroundOwnership = async (req, res, next) => {
+    try {
+        if (req.isAuthenticated()) {
+            const campground = await Campground.findById(req.params.id);
+            if (campground.author.id.equals(req.user._id)){
+                next();
+            } else {
+                console.log("You do not have permission for that.");
+                res.redirect("back");
+            }
+        } else {
+            console.log("You must be logged in for that.");
+            res.redirect("back"); 
+        }
+    } catch (error) {
+        console.log("Could not find campground by ID.");
+        res.redirect("back");
+    }
+}
+
 //INDEX ROUTE (SHOW ALL CAMPGROUNDS)
 router.get('/', (req, res) => {
     // RETRIEVE CAMPGROUND DATA FROM DATABASE:
@@ -70,17 +91,18 @@ router.get('/:id', (req, res) => {
 });
 
 // EDIT ROUTE (SHOW FORM TO EDIT CAMPGROUND)
-router.get('/:id/edit', async (req, res) => {
+router.get('/:id/edit', checkCampgroundOwnership, async (req, res) => {
     try {
         const campground = await Campground.findById(req.params.id);
         res.render('campgrounds/edit', {campground: campground});
     } catch (error) {
         console.log('COULD NOT RENDER CAMPGROUND EDIT PAGE');
+        res.redirect("back");
     }
 });
 
 // UPDATE ROUTE (UPDATE CAMPGROUND DATA IN DB)
-router.put('/:id', async (req, res) => {
+router.put('/:id', checkCampgroundOwnership, async (req, res) => {
     try {
         await Campground.findByIdAndUpdate(req.params.id, req.body.campground);
         res.redirect(`/campgrounds/${req.params.id}`)
@@ -91,7 +113,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DESTROY ROUTE
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', checkCampgroundOwnership, async (req, res) => {
     try {
         await Campground.findByIdAndDelete(req.params.id);
         res.redirect('/campgrounds');
