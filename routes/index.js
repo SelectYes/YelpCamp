@@ -10,14 +10,6 @@ app.use((req, res, next) => {
     next();
 });
 
-// MIDDLEWARE TO CHECK IF USER IS LOGGED IN
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login');
-}
-
 //SHOW REGISTER FORM
 router.get('/register', (req, res) => {
     res.render('register');
@@ -32,9 +24,11 @@ router.post('/register', (req, res) => {
     User.register(newUser, newUserPassword, (err, user) => {
         if (err) {
             console.log(err);
-            return res.render('register');
+            req.flash('error', err.message)
+            return res.redirect('back');
         }
         passport.authenticate('local')(req, res, () => {
+            req.flash('success', `Welcome to Yelpcamp, ${req.body.username}`);
             res.redirect('/campgrounds');
         });
     });
@@ -56,6 +50,7 @@ router.post('/login', passport.authenticate('local',
 // HANDLE LOGOUT LOGIC
 router.get('/logout', (req, res) => {
     req.logout();
+    req.flash('success', 'Successfully logged out.')
     res.redirect('/campgrounds');
 });
 

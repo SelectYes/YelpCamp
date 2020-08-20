@@ -3,7 +3,7 @@ const app           = express();
 const router        = express.Router({mergeParams: true});
 const Campground    = require('../models/campground');
 const Comment       = require('../models/comment');
-// const methodOverride    = require('method-override');
+const middleware    = require('../middleware');
 
 // PASSING LOGGED IN USER DATA TO ALL TEMPLATES
 app.use((req, res, next) => {
@@ -11,37 +11,8 @@ app.use((req, res, next) => {
     next();
 });
 
-// MIDDLEWARE TO CHECK IF USER IS LOGGED IN
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login');
-}
-
-// MIDDLEWARE TO CHECK IF CAMPGROUND BELONGS TO USER
-const checkCommentOwnership = async (req, res, next) => {
-    try {
-        if (req.isAuthenticated()) {
-            const comment = await Comment.findById(req.params.comment_id);
-            if (comment.author.id.equals(req.user._id)) {
-                next();
-            } else {
-                console.log('you cant do that.');
-                res.redirect('back');
-            }
-        } else {
-            console.log('you cant do that.');
-            res.redirect('back');
-        }
-    } catch (error) {
-        console.log('you cant do that.');
-        res.redirect('next');
-    }
-}
-
 // NEW ROUTE
-router.get('/new', isLoggedIn, (req, res) => {
+router.get('/new', middleware.isLoggedIn, (req, res) => {
     Campground.findById(req.params.id, (err, campground) => {
         if (err) {
             console.log(err);
@@ -53,7 +24,7 @@ router.get('/new', isLoggedIn, (req, res) => {
 });
 
 // CREATE ROUTE
-router.post('/', isLoggedIn, async (req, res) => {
+router.post('/', middleware.isLoggedIn, async (req, res) => {
 
     // FIND CAMOGROUND BY ID
     let campground = await Campground.findById(req.params.id)
@@ -74,7 +45,7 @@ router.post('/', isLoggedIn, async (req, res) => {
 });
 
 // EDIT ROUTE
-router.get('/:comment_id/edit', checkCommentOwnership, async (req, res) => {
+router.get('/:comment_id/edit', middleware.checkCommentOwnership, async (req, res) => {
     try {
         const comment = await Comment.findById(req.params.comment_id);
         const campground = await Campground.findById(req.params.id);
@@ -86,9 +57,10 @@ router.get('/:comment_id/edit', checkCommentOwnership, async (req, res) => {
 });
  
 // UPDATE ROUTE
-router.put('/:comment_id', checkCommentOwnership, async (req, res) => {
+router.put('/:comment_id', middleware.checkCommentOwnership, async (req, res) => {
     try {
         await Comment.findByIdAndUpdate(req.params.comment_id, req.body.comments);
+        req.flash('success', 'Comment successfully updated!');
         res.redirect(`/campgrounds/${req.params.id}`);
     } catch (error) {
         console.log(error);
@@ -97,10 +69,11 @@ router.put('/:comment_id', checkCommentOwnership, async (req, res) => {
 });
 
 // DESTROY ROUTE
-router.delete('/:comment_id', checkCommentOwnership, async (req, res) => {
+router.delete('/:comment_id', middleware.checkCommentOwnership, async (req, res) => {
     try {
-        await Comment.findByIdAndDelete(req.params.comment_id)
-        res.redirect(`/campgrounds/${req.params.id}`)
+        await Comment.findByIdAndDelete(req.params.comment_id);
+        req.flash('success', 'Comment successfully removed!');
+        res.redirect(`/campgrounds/${req.params.id}`);
     } catch (error) {
         console.log(error);
     }

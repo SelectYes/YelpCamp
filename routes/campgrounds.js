@@ -2,45 +2,13 @@ const express       = require('express');
 const app           = express();
 const router        = express.Router();
 const Campground    = require('../models/campground');
-// const methodOverride    = require('method-override');
-
-// METHOD OVERRIDE CONFIG
-// app.use(methodOverride('_method'));
+const middleware    = require('../middleware');
 
 // PASSING LOGGED IN USER DATA TO ALL TEMPLATES
-app.use((req, res, next) => {
-    res.locals.currentUser = req.user;
-    next();
-});
-
-// MIDDLEWARE TO CHECK IF USER IS LOGGED IN
-const isLoggedIn = (req, res, next) => {
-    if (req.isAuthenticated()) {
-        return next();
-    }
-    res.redirect('/login');
-}
-
-// MIDDLEWARE TO CHECK IF CAMPGROUND BELONGS TO USER
-const checkCampgroundOwnership = async (req, res, next) => {
-    try {
-        if (req.isAuthenticated()) {
-            const campground = await Campground.findById(req.params.id);
-            if (campground.author.id.equals(req.user._id)){
-                next();
-            } else {
-                console.log("You do not have permission for that.");
-                res.redirect("back");
-            }
-        } else {
-            console.log("You must be logged in for that.");
-            res.redirect("back"); 
-        }
-    } catch (error) {
-        console.log("Could not find campground by ID.");
-        res.redirect("back");
-    }
-}
+// app.use((req, res, next) => {
+//     res.locals.currentUser = req.user;
+//     next();
+// });
 
 //INDEX ROUTE (SHOW ALL CAMPGROUNDS)
 router.get('/', (req, res) => {
@@ -55,7 +23,7 @@ router.get('/', (req, res) => {
 });
 
 //CREATE ROUTE (ADD NEW CAMPGROUNDS TO DATABASE)
-router.post('/', isLoggedIn, async (req, res) => {
+router.post('/', middleware.isLoggedIn, async (req, res) => {
     const name = req.body.name;
     const image = req.body.image;
     const description = req.body.description;
@@ -74,7 +42,7 @@ router.post('/', isLoggedIn, async (req, res) => {
 });
 
 //NEW ROUTE (SHOW FORM TO CREATE NEW CAMPGROUND)
-router.get('/new', isLoggedIn, (req, res) => {
+router.get('/new', middleware.isLoggedIn, (req, res) => {
     res.render('campgrounds/new');
 });
 
@@ -91,7 +59,7 @@ router.get('/:id', (req, res) => {
 });
 
 // EDIT ROUTE (SHOW FORM TO EDIT CAMPGROUND)
-router.get('/:id/edit', checkCampgroundOwnership, async (req, res) => {
+router.get('/:id/edit', middleware.checkCampgroundOwnership, async (req, res) => {
     try {
         const campground = await Campground.findById(req.params.id);
         res.render('campgrounds/edit', {campground: campground});
@@ -102,9 +70,10 @@ router.get('/:id/edit', checkCampgroundOwnership, async (req, res) => {
 });
 
 // UPDATE ROUTE (UPDATE CAMPGROUND DATA IN DB)
-router.put('/:id', checkCampgroundOwnership, async (req, res) => {
+router.put('/:id', middleware.checkCampgroundOwnership, async (req, res) => {
     try {
         await Campground.findByIdAndUpdate(req.params.id, req.body.campground);
+        req.flash('success', 'Campground successfully updated!');
         res.redirect(`/campgrounds/${req.params.id}`)
         
     } catch (error) {
@@ -113,9 +82,10 @@ router.put('/:id', checkCampgroundOwnership, async (req, res) => {
 });
 
 // DESTROY ROUTE
-router.delete('/:id', checkCampgroundOwnership, async (req, res) => {
+router.delete('/:id', middleware.checkCampgroundOwnership, async (req, res) => {
     try {
         await Campground.findByIdAndDelete(req.params.id);
+        req.flash('success', 'Campground successfully removed!');
         res.redirect('/campgrounds');
         
     } catch (error) {

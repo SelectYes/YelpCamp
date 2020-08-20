@@ -7,15 +7,16 @@ const app                   = express();
 const mongoose              = require('mongoose');
 const { urlencoded }        = require('body-parser');
 const { response }          = require('express');
-const Campground            = require('./models/campground');
+const flash                 = require('connect-flash');
 const seedDB                = require('./seeds')
-const Comment               = require('./models/comment');
 const passport              = require('passport');
 const localStrategy         = require('passport-local');
 const passportLocalMongoose = require('passport-local-mongoose'); 
-const User                  = require('./models/user');
-const port = 3000;
 const methodOverride        = require('method-override');
+const User                  = require('./models/user');
+const Campground            = require('./models/campground');
+const Comment               = require('./models/comment');
+const port = 3000;
 
 
 // routes
@@ -36,6 +37,7 @@ app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
 app.use(express.urlencoded({extended: true}));
 app.use(methodOverride('_method'));
+app.use(flash());
 
 // SEED THE DATABASE
 // seedDB();
@@ -58,6 +60,8 @@ passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
     res.locals.currentUser = req.user;
+    res.locals.error = req.flash('error');
+    res.locals.success = req.flash('success');
     next();
 });
 
@@ -67,7 +71,7 @@ app.use(indexRoutes);
 
 // REDIRECT TO INDEX ROUTE
 app.get('/', (req, res) => {
-    res.redirect('/campgrounds');
+    res.render('landing');
 });
 
 app.listen(port, console.log(`YelpCamp server has started on Localhost:${port}`));
