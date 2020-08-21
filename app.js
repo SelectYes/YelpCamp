@@ -2,6 +2,7 @@
 //                                              CONFIG                                                  //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+require('dotenv').config()
 const express               = require('express');
 const app                   = express();
 const mongoose              = require('mongoose');
@@ -28,17 +29,7 @@ const commentRoutes         = require('./routes/comments');
 const indexRoutes           = require('./routes/index');
 
 
-// mongoose.connect('mongodb://localhost:27017/yelp_camp', {
-//     useNewUrlParser: true,
-//     useUnifiedTopology: true,
-//     useFindAndModify: false
-// })
-// .then(() => console.log('Connected to DB!'))
-// .catch(error => console.log(error.message));
-
-                      'mongodb+srv://Lenny:<password>@cluster0.7fkkp.mongodb.net/<dbname>?retryWrites=true&w=majority'
-
-mongoose.connect('mongodb+srv://Lenny:gjEscmfHwQ9g4QH@cluster0.7fkkp.mongodb.net/yelp_camp?retryWrites=true&w=majority', {
+mongoose.connect(process.env.DATABASEURL, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
@@ -46,6 +37,16 @@ mongoose.connect('mongodb+srv://Lenny:gjEscmfHwQ9g4QH@cluster0.7fkkp.mongodb.net
 })
 .then(() => console.log('Connected to DB!'))
 .catch(error => console.log(error.message));
+
+
+// mongoose.connect('mongodb+srv://Lenny:gjEscmfHwQ9g4QH@cluster0.7fkkp.mongodb.net/yelp_camp?retryWrites=true&w=majority', {
+//     useNewUrlParser: true,
+//     useUnifiedTopology: true,
+//     useFindAndModify: false,
+//     useCreateIndex: true
+// })
+// .then(() => console.log('Connected to DB!'))
+// .catch(error => console.log(error.message));
 
 app.set('view engine', 'ejs');
 app.use(express.static(__dirname + '/public'));
