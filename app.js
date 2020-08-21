@@ -16,7 +16,7 @@ const methodOverride        = require('method-override');
 const User                  = require('./models/user');
 const Campground            = require('./models/campground');
 const Comment               = require('./models/comment');
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 
 // routes
