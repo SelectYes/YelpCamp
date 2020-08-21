@@ -7,7 +7,11 @@ middlewareObj.checkCampgroundOwnership = async (req, res, next) => {
     try {
         if (req.isAuthenticated()) {
             const campground = await Campground.findById(req.params.id);
-            if (campground.author.id.equals(req.user._id)){
+            if (!campground) {
+                req.flash('error', '');
+                redirect('back');
+            } 
+            else if (campground.author.id.equals(req.user._id)){
                 next();
             } else {
                 req.flash('error', 'You do not have permission to do that.');
@@ -27,7 +31,11 @@ middlewareObj.checkCommentOwnership = async (req, res, next) => {
     try {
         if (req.isAuthenticated()) {
             const comment = await Comment.findById(req.params.comment_id);
-            if (comment.author.id.equals(req.user._id)) {
+            if (!comment) {
+                req.flash('error', '');
+                redirect('back');
+            }
+            else if (comment.author.id.equals(req.user._id)) {
                 next();
             } else {
                 req.flash('error', 'You do not have permission to do that.');
@@ -38,7 +46,7 @@ middlewareObj.checkCommentOwnership = async (req, res, next) => {
             res.redirect('back');
         }
     } catch (error) {
-        req.flash('error', 'Campground not found.');
+        req.flash('error', 'Comment not found.');
         res.redirect('next');
     }
 };

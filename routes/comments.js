@@ -4,6 +4,7 @@ const router        = express.Router({mergeParams: true});
 const Campground    = require('../models/campground');
 const Comment       = require('../models/comment');
 const middleware    = require('../middleware');
+const campground = require('../models/campground');
 
 // PASSING LOGGED IN USER DATA TO ALL TEMPLATES
 app.use((req, res, next) => {
@@ -59,11 +60,17 @@ router.get('/:comment_id/edit', middleware.checkCommentOwnership, async (req, re
 // UPDATE ROUTE
 router.put('/:comment_id', middleware.checkCommentOwnership, async (req, res) => {
     try {
-        await Comment.findByIdAndUpdate(req.params.comment_id, req.body.comments);
-        req.flash('success', 'Comment successfully updated!');
-        res.redirect(`/campgrounds/${req.params.id}`);
+        const comment = Comment.findById(req.params.comment_id);
+        if (!comment) {
+            req.flash('error', 'Comment not found.');
+            res.redirect('back');
+        } else {
+            await Comment.findByIdAndUpdate(req.params.comment_id, req.body.comments);
+            req.flash('success', 'Comment successfully updated!');
+            res.redirect(`/campgrounds/${req.params.id}`);
+        }
     } catch (error) {
-        console.log(error);
+        req.flash('error', 'Campground not found.');
     }
 
 });
