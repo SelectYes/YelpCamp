@@ -58,7 +58,7 @@ app.use(flash());
 //                                           PASSPORT CONFIG                                            //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-app.use(require('express-session')({
+app.use(session)({
     secret: 'Benny is the cutest pooch. 10/10, will pet even when wet.',
     resave: false,
     saveUninitialized: false,
