@@ -16,7 +16,10 @@ const methodOverride        = require('method-override');
 const User                  = require('./models/user');
 const Campground            = require('./models/campground');
 const Comment               = require('./models/comment');
-var port                  = process.env.PORT || 3000;
+var port                    = process.env.PORT || 3000;
+
+var session                 = require("express-session");
+var MongoStore              = require("connect-mongo")(session);
 
 
 // routes
@@ -58,7 +61,9 @@ app.use(flash());
 app.use(require('express-session')({
     secret: 'Benny is the cutest pooch. 10/10, will pet even when wet.',
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    store: new MongoStore({ mongooseConnection: mongoose.connection }),
+    cookie: { maxAge: 180 * 60 * 1000 } // 180 minutes session expiration
 }));
 
 app.use(passport.initialize());
