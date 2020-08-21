@@ -36,7 +36,9 @@ const indexRoutes           = require('./routes/index');
 // .then(() => console.log('Connected to DB!'))
 // .catch(error => console.log(error.message));
 
-mongoose.connect('mongodb+srv://Lenny:gjEscmfHwQ9g4QH@cluster0.7fkkp.mongodb.net/YelpCamp?retryWrites=true&w=majority', {
+                      'mongodb+srv://Lenny:<password>@cluster0.7fkkp.mongodb.net/<dbname>?retryWrites=true&w=majority'
+
+mongoose.connect('mongodb+srv://Lenny:gjEscmfHwQ9g4QH@cluster0.7fkkp.mongodb.net/yelp_camp?retryWrites=true&w=majority', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     useFindAndModify: false,
